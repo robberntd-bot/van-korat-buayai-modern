@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตารางเวลารถตู้พรทวีชัย โคราช-บัวใหญ่</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>ตารางเวลารถตู้</h1>
+  <p>โคราช ↔ บัวใหญ่</p>
+</header>
+<nav>
+  <ul>
+    <li><a href="index.html">หน้าแรก</a></li>
+    <li><a href="schedule.html" class="active">ตารางเวลา</a></li>
+    <li><a href="news.html">ข่าวสาร</a></li>
+  </ul>
+</nav>
+<div class="container">
+  <div class="card">
+    <h2>เลือกรอบตาราง</h2>
+    <select id="scheduleSelect" onchange="loadSchedule(this.value)">
+      <option value="3schedule.json">ตาราง 3</option>
+      <option value="3+schedule.json">ตาราง 3+</option>
+      <option value="4schedule.json">ตาราง 4</option>
+      <option value="4+schedule.json">ตาราง 4+</option>
+      <option value="closed">ปิดชั่วคราว (ไม่แสดงตาราง)</option>
+    </select>
+
+    <div id="scheduleContent">
+      <div class="grid grid-2">
+        <div>
+          <h3>โคราช → บัวใหญ่</h3>
+          <div class="time-list" id="koratTimes"></div>
+        </div>
+        <div>
+          <h3>บัวใหญ่ → โคราช</h3>
+          <div class="time-list" id="buayaiTimes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>บริษัท พรทวีชัยราชสีมา จำกัด</footer>
+<script>
+function renderTimes(id, list) {
+  const el = document.getElementById(id);
+  el.innerHTML = list.filter(x => x.time).map(x =>
+    `<div class="time-item">${x.time}${x.note ? `<small>${x.note}</small>` : ''}</div>`
+  ).join('') || '<p>ไม่มีรอบ</p>';
+}
+function loadSchedule(file) {
+  const content = document.getElementById('scheduleContent');
+  if (file === 'closed') {
+    content.innerHTML = '<div class="notice" style="text-align:center;font-size:1.2rem;">ขณะนี้ยังไม่เปิดให้ดูตารางเวลา</div>';
+    return;
+  }
+  content.innerHTML = '<div class="grid grid-2"><div><h3>โคราช → บัวใหญ่</h3><div class="time-list" id="koratTimes"></div></div><div><h3>บัวใหญ่ → โคราช</h3><div class="time-list" id="buayaiTimes"></div></div></div>';
+  fetch('data/' + file)
+    .then(r => { if(!r.ok) throw 0; return r.json(); })
+    .then(data => {
+      renderTimes('koratTimes', data.korat);
+      renderTimes('buayaiTimes', data.buayai);
+    })
+    .catch(() => {
+      content.innerHTML = '<div class="notice">ไม่พบข้อมูลตารางเวลา</div>';
+    });
+}
+loadSchedule('3schedule.json');
+</script>
+</body>
+</html>
